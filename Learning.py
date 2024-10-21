@@ -238,9 +238,9 @@ home_model.fit(X, y)
 print("Making predictions for the following 5 houses:")
 print(X.head())
 print("The predictions are")
-printhomene_model.predict(X.head()))
+print(home_model.predict(X.head()))
 
-predictions = hime_model.predict(X)
+predictions = home_model.predict(X)
 print(predictions)
 
 #Once we have a model, here is how we calculate the mean absolute error
@@ -264,3 +264,70 @@ homee_model.fit(train_X, train_y)
 # get predicted prices on validation data
 val_predictions = home_model.predict(val_X)
 print(mean_absolute_error(val_y, val_predictions))
+
+
+# Import the train_test_split function and uncomment
+from sklearn.model_selection import train_test_split
+
+# fill in and uncomment
+train_X, val_X, train_y, val_y = train_test_split(X, y, random_state = 1)
+# Specify the model
+iowa_model = DecisionTreeRegressor(random_state=1)
+
+# Fit iowa_model with the training data.
+iowa_model.fit(train_X,train_y)
+
+# Predict with all validation observations
+val_predictions = iowa_model.predict(val_X)
+
+from sklearn.metrics import mean_absolute_error
+val_mae = mean_absolute_error(val_y, val_predictions)
+
+# uncomment following line to see the validation_mae
+print(val_mae)
+
+#Treating overfitting and underfitting with max_laef_nodes
+from sklearn.metrics import mean_absolute_error
+from sklearn.tree import DecisionTreeRegressor
+
+def get_mae(max_leaf_nodes, train_X, val_X, train_y, val_y):
+    model = DecisionTreeRegressor(max_leaf_nodes=max_leaf_nodes, random_state=0)
+    model.fit(train_X, train_y)
+    preds_val = model.predict(val_X)
+    mae = mean_absolute_error(val_y, preds_val)
+    return(mae)
+# compare MAE with differing values of max_leaf_nodes
+for max_leaf_nodes in [5, 50, 500, 5000]:
+    my_mae = get_mae(max_leaf_nodes, train_X, val_X, train_y, val_y)
+    print("Max leaf nodes: %d  \t\t Mean Absolute Error:  %d" %(max_leaf_nodes, my_mae))
+
+#Compare Different Tree Sizes
+
+candidate_max_leaf_nodes = [5, 25, 50, 100, 250, 500]
+# Write loop to find the ideal tree size from candidate_max_leaf_node
+my_mae = {leaf_size: get_mae(leaf_size, train_X, val_X, train_y, val_y) for leaf_size in candidate_max_leaf_nodes}
+    
+# Store the best value of max_leaf_nodes (it will be either 5, 25, 50, 100, 250 or 500)
+best_tree_size = min(my_mae, key=my_mae.get)
+
+#Fit Model Using All Data
+# Fill in argument to make optimal size and uncomment
+final_model = DecisionTreeRegressor(max_leaf_nodes=best_tree_size, random_state=1)
+
+# fit the final model and uncomment the next two lines
+final_model.fit(X, y)
+
+#using RandomForest as model 
+from sklearn.ensemble import RandomForestRegressor
+
+# Define the model. Set random_state to 1
+rf_model = RandomForestRegressor(random_state=1)
+
+# fit your model
+rf_model.fit(train_X, train_y)
+
+# Calculate the mean absolute error of your Random Forest model on the validation data
+rf_predictions_mae= rf_model.predict(val_X)
+rf_val_mae =mean_absolute_error(rf_predictions_mae, val_y)
+
+print("Validation MAE for Random Forest Model: {}".format(rf_val_mae))

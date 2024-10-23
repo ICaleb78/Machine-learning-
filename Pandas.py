@@ -113,3 +113,39 @@ reviews.taster_name.unique()
 reviews.taster_name.value_counts()
 
 #remean the scores the wines received to 0.
+review_points_mean = reviews.points.mean()
+reviews.points.map(lambda p: p - review_points_mean)
+
+#using appl(.) for mapping 
+def remean_points(row):
+    row.points = row.points - review_points_mean
+    return row
+
+reviews.apply(remean_points, axis='columns')
+
+#Pandas provides many common mapping operations as built-ins. For example, here's a faster way of remeaning our points column:
+review_points_mean = reviews.points.mean()
+reviews.points - review_points_mean
+
+#an easy way of combining country and region information in the dataset would be to do the following:
+reviews.country + " - " + reviews.region_1
+
+#EXERCISE
+# q1: What is the median of the points column in the reviews DataFrame?
+median_points = reviews.points.median()
+
+#q2: What countries are represented in the dataset? (Your answer should not include any duplicates.)
+countries = reviews.country.unique()
+#q4: How often does each country appear in the dataset? Create a Series reviews_per_country mapping countries to the count of reviews of wines from that country
+reviews_per_country = reviews.country.value_counts()
+
+#q4: Create variable centered_price containing a version of the price column with the mean price subtracted.
+reviews_price_mean = reviews.price.mean()
+centered_price = reviews.price - reviews_price_mean
+
+#q6: I'm an economical wine buyer. Which wine is the "best bargain"? Create a variable bargain_wine with the title of the wine with the highest points-to-price ratio in the dataset.
+bargain_idx = (reviews.points / reviews.price).idxmax()
+bargain_wine = reviews.loc[bargain_idx, 'title']
+
+#q6: describing a bottle of wine. Is a wine more likely to be "tropical" or "fruity"? Create a Series descriptor_counts counting how many times each of these two words appears in the descriptio
+

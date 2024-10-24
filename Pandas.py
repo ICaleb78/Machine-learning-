@@ -172,3 +172,38 @@ star_ratings = reviews.apply(stars, axis='columns')
 
 #One function we've been using heavily thus far is the value_counts() function. We can replicate what value_counts()
 reviews.groupby('points').points.count()
+
+#We can use any of the summary functions we've used before with this data. For example, to get the cheapest wine in each point value category, we can do the following:
+reviews.groupby('points').price.min()
+
+#For example, here's one way of selecting the name of the first wine reviewed from each winery in the dataset:
+reviews.groupby('winery').apply(lambda df: df.title.iloc[0])
+
+#For even more fine-grained control, you can also group by more than one column. For an example, here's how we would pick out the best wine by country and province:
+reviews.groupby(['country', 'province']).apply(lambda df: df.loc[df.points.idxmax()])
+
+#Another groupby() method worth mentioning is agg(), which lets you run a bunch of different functions on your DataFrame simultaneously. For example, we can generate a simple statistical summary of the dataset as follows:
+reviews.groupby(['country']).price.agg([len, min, max])
+
+countries_reviewed = reviews.groupby(['country', 'province']).description.agg([len])
+countries_reviewed
+mi = countries_reviewed.index
+type(mi)
+
+#MULTI-INDEXING 
+#However, in general the multi-index method you will use most often is the one for converting back to a regular index, the reset_index() method:
+countries_reviewed.reset_index()
+
+#SORTING
+countries_reviewed = countries_reviewed.reset_index()
+countries_reviewed.sort_values(by='len')
+
+#sort_values() defaults to an ascending sort, where the lowest values go first. However, most of the time we want a descending sort, where the higher numbers go first. That goes thusly:
+
+countries_reviewed.sort_values(by='len', ascending=False)
+
+#To sort by index values, use the companion method sort_index(). This method has the same arguments and default order:
+countries_reviewed.sort_index()
+
+#Finally, know that you can sort by more than one column at a time:
+countries_reviewed.sort_values(by=['country', 'len'])

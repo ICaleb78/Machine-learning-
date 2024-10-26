@@ -222,3 +222,31 @@ reviewer_mean_ratings =reviews.groupby(['taster_name']).points.mean()
 #q6: What combination of countries and varieties are most common? Create a `Series` whose index is a `MultiIndex`of `{country, variety}` pairs. For example, a pinot noir produced in the US should map to `{"US", "Pinot Noir"}`. Sort the values in the `Series` in descending order based on wine count.
 country_variety_counts = reviews.groupby(['country', 'variety']).size().sort_values(ascending=False)
 
+#DATA TYPES & MISSING VALUES
+reviews.price.dtype
+reviews.dtypes #returns the type of data in all column
+reviews.points.astype('float64') # to change from one data type to aother 
+reviews.index.dtype  #A DataFrame or Series index has its own dtype, too:
+reviews[pd.isnull(reviews.country)] #to locate or compare missing columns or missing data
+reviews[pd.notnull(reviews.country)]
+reviews.region_2.fillna("Unknown") # replacing missing values
+reviews.taster_twitter_handle.replace("@kerinokeefe", "@kerino") # to replace a particular value
+
+#EXERCISE
+#Q1 :What is the data type of the `points` column in the dataset?
+dtype = reviews.points.dtype
+#q2: Create a Series from entries in the `points` column, but convert the entries to strings. Hint: strings are `str` in native Python.
+point_strings = reviews.points.astype('str')
+#Q3: Sometimes the price column is null. How many reviews in the dataset are missing a price?
+missing_price_reviews = reviews[reviews.price.isnull()]
+n_missing_prices = len(missing_price_reviews)
+# cute alternative solution:  if we sum a bolean series, True is treated as 1 and False as 0
+n_missing_prices = reviews.price.isnull().sum()
+# or equivalently
+n-missing_prices = pd.isnull(reviews.price).sum()
+
+#Q4: What are the most common wine-producing regions? Create a Series counting the number of times each value occurs in the `region_1` field. This field is often missing data, so replace missing values with `Unknown`. Sort in descending order.  Your output should look something like this:
+reviews_per_region1 = reviews.region_1.fillna("Unknown") 
+reviews_per_region = reviews_per_region1.value_counts()
+#OR
+reviews_per_region =reviews.region_1.fillna('Unknown').value_counts.sort_values(ascending=False)

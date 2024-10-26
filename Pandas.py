@@ -250,3 +250,37 @@ reviews_per_region1 = reviews.region_1.fillna("Unknown")
 reviews_per_region = reviews_per_region1.value_counts()
 #OR
 reviews_per_region =reviews.region_1.fillna('Unknown').value_counts.sort_values(ascending=False)
+
+#RENAMING & COMBINNING
+reviews.rename(columns={'points': 'score'}) #to change the points column in our dataset to score, we would do:
+reviews.rename(index={0: 'firstEntry', 1: 'secondEntry'}) #rename() lets you rename index or column values by specifying a index or column keyword parameter, respectively. It supports a variety of input formats, but usually a Python dictionary is the most convenient.
+reviews.rename_axis("wines", axis='rows').rename_axis("fields", axis='columns') #Both the row index and the column index can have their own name attribute.The complimentary rename_axis() method may be used to change these names. Fo
+canadian_youtube = pd.read_csv("../input/youtube-new/CAvideos.csv")
+british_youtube = pd.read_csv("../input/youtube-new/GBvideos.csv")
+pd.concat([canadian_youtube, british_youtube]) # to combinne two seperate dataset: you open the combinations on python first , then u combine 
+
+left = canadian_youtube.set_index(['title', 'trending_date'])
+right = british_youtube.set_index(['title', 'trending_date'])
+
+left.join(right, lsuffix='_CAN', rsuffix='_UK') #The middlemost combiner in terms of complexity is join(). join() lets you combine different DataFrame objects which have an index in common.
+
+#EXERCISE 
+#Q1: `region_1` and `region_2` are pretty uninformative names for locale columns in the dataset. Create a copy of `reviews` with these columns renamed to `region` and `locale`, respectively.
+renamed = reviews.rename(columns={'region_1': 'region', 'region_2': 'locale'})
+#Q2: Set the index name in the dataset to `wines`
+reindexed = reviews.rename_axis('wines', axis='rows')
+#Q3: 
+gaming_products = pd.read_csv("../input/things-on-reddit/top-things/top-things/reddits/g/gaming.csv")
+gaming_products['subreddit'] = "r/gaming"
+movie_products = pd.read_csv("../input/things-on-reddit/top-things/top-things/reddits/m/movies.csv")
+movie_products['subreddit'] = "r/movies"
+#Create a `DataFrame` of products mentioned on *either* subreddit.
+combined_products = pd.concat([gaming_products, movie_products]) #first run the cell above 
+
+#Q$
+#The [Powerlifting Database](https://www.kaggle.com/open-powerlifting/powerlifting-database) dataset on Kaggle includes one CSV table for powerlifting meets and a separate one for powerlifting competitors. Run the cell below to load these datasets into dataframes:
+powerlifting_meets = pd.read_csv("../input/powerlifting-database/meets.csv")
+powerlifting_competitors = pd.read_csv("../input/powerlifting-database/openpowerlifting.csv")
+#Both tables include references to a `MeetID`, a unique key for each meet (competition) included in the database. Using this, generate a dataset combining the two tables into one.
+powerlifting_combined = powerlifting_meets.set_index('MeetID').join(powerlifting_competitors.set_index('MeetID'))
+

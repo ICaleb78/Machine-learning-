@@ -170,3 +170,69 @@ X_test = X_test_full.select_dtypes(exclude=['object'])
 
 # Break off validation set from training data
 X_train, X_valid, y_train, y_valid = train_test_split(X, y, train_size=0.8, test_size=0.2, random_state=0)
+
+# Step 1: Preliminary investigation
+
+#Run the code cell below without changes.
+# Shape of training data (num_rows, num_columns)
+print(X_train.shape)
+
+# Number of missing values in each column of training data
+missing_val_count_by_column = (X_train.isnull().sum())
+print(missing_val_count_by_column[missing_val_count_by_column > 0]) #this code run an output to give the details of the missing entries(anything showed is the missing values quantity)
+
+
+# Step 2: Drop columns with missing values
+#In this step, you'll preprocess the data in `X_train` and `X_valid` to remove columns with missing values.  Set the preprocessed DataFrames to `reduced_X_train` and `reduced_X_valid`, respectively.  
+# Fill in the line below: get names of columns with missing values
+cols_with_missing = [col for col in X_train.columns
+                     if X_train[col].isnull().any()] # Your code here
+
+# Fill in the lines below: drop columns in training and validation data
+reduced_X_train = X_train.drop(cols_with_missing, axis=1)
+reduced_X_valid = X_valid.drop(cols_with_missing, axis=1)
+
+#Run the next code cell without changes to obtain the MAE for this approach.
+print("MAE (Drop columns with missing values):")
+print(score_dataset(reduced_X_train, reduced_X_valid, y_train, y_valid)) #MAE (drop columns with missing values)
+
+# Step 3: Imputation
+
+### Part A
+#Use the next code cell to impute missing values with the mean value along each column.  Set the preprocessed DataFrames to `imputed_X_train` and `imputed_X_valid`.  Make sure that the column names match those in `X_train` and `X_valid`.
+from sklearn.impute import SimpleImputer
+
+# Fill in the lines below: imputation
+my_imputer = SimpleImputer() # Your code here
+imputed_X_train = pd.DataFrame(my_imputer.fit_transform(X_train))
+imputed_X_valid =  pd.DataFrame(my_imputer.transform(X_valid))
+
+# Fill in the lines below: imputation removed column names; put them back
+imputed_X_train.columns = X_train.columns
+imputed_X_valid.columns =  X_valid.columns
+#Run the next code cell without changes to obtain the MAE for this approach.
+print("MAE (Imputation):")
+print(score_dataset(imputed_X_train, imputed_X_valid, y_train, y_valid))
+
+# Step 4: Generate test predictions
+
+#In this final step, you'll use any approach of your choosing to deal with missing values.  Once you've preprocessed the training and validation features, you'll train and evaluate a random forest model.  Then, you'll preprocess the test data before generating predictions that can be submitted to the competition!
+
+### Part A
+
+#Use the next code cell to preprocess the training and validation data.  Set the preprocessed DataFrames to `final_X_train` and `final_X_valid`.  **You can use any approach of your choosing here!**  in order for this step to be marked as correct, you need only ensure:
+#- the preprocessed DataFrames have the same number of columns,
+#- the preprocessed DataFrames have no missing values, 
+#- `final_X_train` and `y_train` have the same number of rows, and
+#- `final_X_valid` and `y_valid` have the same number of rows.
+# Preprocessed training and validation features
+final_imputer = SimpleImputer(strategy='median')
+final_X_train = pd.DataFrame(final_imputer.fit_transform(X_train))
+final_X_valid = pd.DataFrame(final_imputer.fit_transform(X_valid))
+
+
+# Fill in the line below: preprocess test data
+final_X_test = pd.DataFrame(final_imputer.fit_transform(X_test))
+
+# Fill in the line below: get test predictions
+preds_test = model.predict(final_X_test)

@@ -329,3 +329,32 @@ OH_X_valid.columns = OH_X_valid.columns.astype(str)
 print("MAE from Approach 3 (One-Hot Encoding):") 
 print(score_dataset(OH_X_train, OH_X_valid, y_train, y_valid))
 
+#EXERCISE 
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error
+
+# function for comparing different approaches
+def score_dataset(X_train, X_valid, y_train, y_valid):
+    model = RandomForestRegressor(n_estimators=100, random_state=0)
+    model.fit(X_train, y_train)
+    preds = model.predict(X_valid)
+    return mean_absolute_error(y_valid, preds)
+
+#Specifically, we'll look at the `'Condition2'` column.  The code cell below prints the unique entries in both the training and validation sets.
+print("Unique values in 'Condition2' column in training data:", X_train['Condition2'].unique())
+print("\nUnique values in 'Condition2' column in validation data:", X_valid['Condition2'].unique())
+#Run the code cell below to save the problematic columns to a Python list `bad_label_cols`.  Likewise, columns that can be safely ordinal encoded are stored in `good_label_cols`.
+# Categorical columns in the training data
+object_cols = [col for col in X_train.columns if X_train[col].dtype == "object"]
+
+# Columns that can be safely ordinal encoded
+good_label_cols = [col for col in object_cols if 
+                   set(X_valid[col]).issubset(set(X_train[col]))]
+        
+# Problematic columns that will be dropped from the dataset
+bad_label_cols = list(set(object_cols)-set(good_label_cols))
+        
+print('Categorical columns that will be ordinal encoded:', good_label_cols)
+print('\nCategorical columns that will be dropped from the dataset:', bad_label_cols)
+
+

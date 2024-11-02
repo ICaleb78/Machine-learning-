@@ -581,3 +581,59 @@ clf.fit(X_train, y_train)
 preds = clf.predict(X_valid)
 
 print('MAE:', mean_absolute_error(y_valid, preds))
+
+#Q!: Step 1: Improve the performance¶
+#Part A
+#Now, it's your turn! In the code cell below, define your own preprocessing steps and random forest model. Fill in values for the following variables
+# Preprocessing for numerical data
+numerical_transformer = SimpleImputer(strategy='constant') # Your code here
+
+# Preprocessing for categorical data
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+ # Your code here
+
+# Bundle preprocessing for numerical and categorical data
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, numerical_cols),
+        ('cat', categorical_transformer, categorical_cols)
+    ])
+
+# Define model
+model =RandomForestRegressor(n_estimators=100, random_state=0) # Your code here
+
+#Q@: Part B
+#Run the code cell below without changes.
+#To pass this step, you need to have defined a pipeline in Part A that achieves lower MAE than the code above. You're encouraged to take your time here and try out many different approaches, to see how low you can get the MAE! (If your code does not pass, please amend the preprocessing steps and model in Part A.
+# Bundle preprocessing and modeling code in a pipeline
+my_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', model)
+                             ])
+
+# Preprocessing of training data, fit model 
+my_pipeline.fit(X_train, y_train)
+
+# Preprocessing of validation data, get predictions
+preds = my_pipeline.predict(X_valid)
+
+# Evaluate the model
+score = mean_absolute_error(y_valid, preds)
+print('MAE:', score)
+
+#Step 2: Generate test predictions
+#Now, you'll use your trained model to generate predictions with the test data.
+# Preprocessing of test data, fit model
+my_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', model)
+                             ])
+my_pipeline.fit(X_train, y_train)
+preds_test =  my_pipeline.predict(X_test)# Your code here
+
+#Run the next code cell without changes to save your results to a CSV file that can be submitted directly to the competition.
+# Save test predictions to file
+output = pd.DataFrame({'Id': X_test.index,
+                       'SalePrice': preds_test})
+output.to_csv('submission.csv', index=False)

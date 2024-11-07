@@ -732,3 +732,33 @@ def get_score(n_estimators):
 #Step 2: Test different parameter values
 #Now, you will use the function that you defined in Step 1 to evaluate the model performance corresponding to eight different values for the number of trees in the random forest: 50, 100, 150, ..., 300, 350, 400.
 #Store your results in a Python dictionary results, where results[i] is the average MAE returned by get_score(i)
+model_1 = RandomForestRegressor(n_estimators=50, random_state=0)
+model_2 = RandomForestRegressor(n_estimators=100, random_state=0)
+model_3 = RandomForestRegressor(n_estimators=150,  random_state=0)
+model_4 = RandomForestRegressor(n_estimators=200,  random_state=0)
+model_5 = RandomForestRegressor(n_estimators=250,  random_state=0)
+model_6 = RandomForestRegressor(n_estimators=300,  random_state=0)
+model_7 = RandomForestRegressor(n_estimators=350,  random_state=0)
+model_8 = RandomForestRegressor(n_estimators=400,  random_state=0)
+models = [model_1, model_2, model_3, model_4, model_5, model_6, model_7, model_8]
+def get_score(n_estimators):
+    my_pipeline = Pipeline(steps=[
+        ('preprocessor', SimpleImputer()),
+        ('models', RandomForestRegressor(n_estimators, random_state=0))
+    ])
+    scores = -1 * cross_val_score(my_pipeline, X, y,
+                                  cv=3,
+                                  scoring='neg_mean_absolute_error')
+    return scores.mean()
+results = {}
+for i in range(1,9):
+    results[50*i] = get_score(50*i)
+#Use the next cell to visualize your results from Step 2. Run the code without changes
+import matplotlib.pyplot as plt
+%matplotlib inline
+plt.plot(list(results.keys()), list(results.values()))
+plt.show()
+
+#Step 3: Find the best parameter value
+#Given the results, which value for n_estimators seems best for the random forest model? Use your answer to set the value of n_estimators_best
+n_estimators_best = min(results, key=results.get)

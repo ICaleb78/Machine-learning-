@@ -637,3 +637,98 @@ preds_test =  my_pipeline.predict(X_test)# Your code here
 output = pd.DataFrame({'Id': X_test.index,
                        'SalePrice': preds_test})
 output.to_csv('submission.csv', index=False)
+
+
+#CROSS VALIDATION 
+import pandas as pd
+
+# Read the data
+data = pd.read_csv('../input/melbourne-housing-snapshot/melb_data.csv')
+
+# Select subset of predictors
+cols_to_use = ['Rooms', 'Distance', 'Landsize', 'BuildingArea', 'YearBuilt']
+X = data[cols_to_use]
+
+# Select target
+y = data.Price
+#Then, we define a pipeline that uses an imputer to fill in missing values and a random forest model to make predictions.
+
+#While it's possible to do cross-validation without pipelines, it is quite difficult! Using a pipeline will make the code remarkably straightforward
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+
+my_pipeline = Pipeline(steps=[('preprocessor', SimpleImputer()),
+                              ('model', RandomForestRegressor(n_estimators=50,
+                                                              random_state=0))
+                             ])
+
+#We obtain the cross-validation scores with the cross_val_score() function from scikit-learn. We set the number of folds with the cv parameter
+from sklearn.model_selection import cross_val_score
+
+# Multiply by -1 since sklearn calculates *negative* MAE
+scores = -1 * cross_val_score(my_pipeline, X, y,
+                              cv=5,
+                              scoring='neg_mean_absolute_error')
+print("Average MAE score (across experiments):")
+print(scores.mean())
+
+#EXERCISE 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Read the data
+train_data = pd.read_csv('../input/train.csv', index_col='Id')
+test_data = pd.read_csv('../input/test.csv', index_col='Id')
+
+# Remove rows with missing target, separate target from predictors
+train_data.dropna(axis=0, subset=['SalePrice'], inplace=True)
+y = train_data.SalePrice              
+train_data.drop(['SalePrice'], axis=1, inplace=True)
+
+# Select numeric columns only
+numeric_cols = [cname for cname in train_data.columns if train_data[cname].dtype in ['int64', 'float64']]
+X = train_data[numeric_cols].copy()
+X_test = test_data[numeric_cols].copy()
+
+#We set the number of trees in the random forest model with the n_estimators parameter, and setting random_state ensures reproducibility.
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+
+my_pipeline = Pipeline(steps=[
+    ('preprocessor', SimpleImputer()),
+    ('model', RandomForestRegressor(n_estimators=50, random_state=0))
+])
+
+from sklearn.model_selection import cross_val_score
+
+# Multiply by -1 since sklearn calculates *negative* MAE
+scores = -1 * cross_val_score(my_pipeline, X, y,
+                              cv=5,
+                              scoring='neg_mean_absolute_error')
+
+print("Average MAE score:", scores.mean())
+
+print("MAE scores:\n", scores)
+
+#Step 1: Write a useful function
+#In this exercise, you'll use cross-validation to select parameters for a machine learning model.
+#Begin by writing a function get_score() that reports the average (over three cross-validation folds) MAE of a machine learning pipeline that uses:
+#the data in X and y to create folds,
+#SimpleImputer() (with all parameters left as default) to replace missing values, and
+#RandomForestRegressor() (with random_state=0) to fit a random forest model
+def get_score(n_estimators):
+    my_pipeline = Pipeline(steps=[
+        ('preprocessor', SimpleImputer()),
+        ('model', RandomForestRegressor(n_estimators, random_state=0))
+    ])
+    scores = -1 * cross_val_score(my_pipeline, X, y,
+                                  cv=3,
+                                  scoring='neg_mean_absolute_error')
+    return scores.mean()
+
+#Step 2: Test different parameter values
+#Now, you will use the function that you defined in Step 1 to evaluate the model performance corresponding to eight different values for the number of trees in the random forest: 50, 100, 150, ..., 300, 350, 400.
+#Store your results in a Python dictionary results, where results[i] is the average MAE returned by get_score(i)

@@ -899,3 +899,42 @@ print("Mean Absolute Error:" , mae_1)
 
 #Step 2: Improve the model
 #Now that you've trained a default model as baseline, it's time to tinker with the parameters, to see if you can get better performance!
+# Define the model
+my_model_2 = XGBRegressor(n_estimators=1000, learning_rate =0.05) # Your code here
+
+# Fit the model
+my_model_2.fit(X_train, y_train, 
+             early_stopping_rounds=5, 
+             eval_set=[(X_valid, y_valid)], 
+             verbose=False)# Your code here
+
+# Get predictions
+predictions_2 = my_model_2.predict(X_valid) # Your code here
+
+# Calculate MAE
+mae_2 = (mean_absolute_error(predictions_2, y_valid)) # Your code here
+
+# Uncomment to print MAE
+print("Mean Absolute Error:" , mae_2)
+
+#Step 3: Break the model
+#In this step, you will create a model that performs worse than the original model in Step 1. This will help you to develop your intuition for how to set parameters. You might even find that you accidentally get better performance, which is ultimately a nice problem to have and a valuable learning experience!
+# Define the model
+my_model_3 = XGBRegressor(n_estimators=10, learning_rate =0.05) # Your code here
+
+# Fit the model
+my_model_3.fit(X_train, y_train, 
+             early_stopping_rounds=5, 
+             eval_set=[(X_valid, y_valid)], 
+             verbose=False)# Your code here
+
+# Get predictions
+predictions_3 = my_model_3.predict(X_valid) # Your code here
+
+# Calculate MAE
+mae_3 = (mean_absolute_error(predictions_3, y_valid)) # Your code here
+
+# Uncomment to print MAE
+print("Mean Absolute Error:" , mae_3)
+
+#DATA LEAKAGE 

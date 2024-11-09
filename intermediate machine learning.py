@@ -884,3 +884,18 @@ my_model_1.fit(X_train, y_train) # Your code here
 
 #Part B
 #Set predictions_1 to the model's predictions for the validation data. Recall that the validation features are stored in X_valid
+from sklearn.metrics import mean_absolute_error
+
+# Get predictions
+predictions_1 = my_model_1.predict(X_valid) # Your code here
+
+#Part C
+#Finally, use the mean_absolute_error() function to calculate the mean absolute error (MAE) corresponding to the predictions for the validation set. Recall that the labels for the validation data are stored in y_valid.
+# Calculate MAE
+mae_1 = (mean_absolute_error(predictions_1, y_valid)) # Your code here
+
+# Uncomment to print MAE
+print("Mean Absolute Error:" , mae_1)
+
+#Step 2: Improve the model
+#Now that you've trained a default model as baseline, it's time to tinker with the parameters, to see if you can get better performance!

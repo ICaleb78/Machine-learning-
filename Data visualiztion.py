@@ -96,3 +96,41 @@ sns.lmplot(x="bmi", y="charges", hue="smoker", data=insurance_data)
 
 #categorical scatter plot
 sns.swarmplot(x=insurance_data['smoker'], y=insurance_data['charges'])
+
+
+#Distributions
+# Histogram 
+sns.histplot(iris_data['Petal Length (cm)'])
+
+#DENSITY PLOT
+# KDE plot 
+sns.kdeplot(data=iris_data['Petal Length (cm)'], shade=True)
+
+# 2D KDE plot
+sns.jointplot(x=iris_data['Petal Length (cm)'], y=iris_data['Sepal Width (cm)'], kind="kde")
+
+#COLOR CODE PLOT
+# Histograms for each species
+sns.histplot(data=iris_data, x='Petal Length (cm)', hue='Species')
+
+# Add title
+plt.title("Histogram of Petal Lengths, by Species")
+
+# KDE plots for each species
+sns.kdeplot(data=iris_data, x='Petal Length (cm)', hue='Species', shade=True)
+
+# Add title
+plt.title("Distribution of Petal Lengths, by Species")
+
+
+#Choosing Plot Types and Custom Styles
+# Change the style of the figure to the "dark" theme
+sns.set_style("dark")
+
+# Line chart 
+plt.figure(figsize=(12,6))
+sns.lineplot(data=spotify_data)
+
+#Seaborn has five different themes: (1)"darkgrid", (2)"whitegrid", (3)"dark", (4)"white", and (5)"ticks", and you need only use a 
+#command similar to the one in the code cell above (with the chosen theme filled in) to change it
+

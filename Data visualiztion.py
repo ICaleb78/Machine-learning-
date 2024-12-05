@@ -80,3 +80,19 @@ sns.heatmap(data=flight_data, annot=True)
 
 # Add label for horizontal axis
 plt.xlabel("Airline")
+
+
+#SCATTER PLOT 
+sns.scatterplot(x=insurance_data['bmi'], y=insurance_data['charges'])
+
+#to add a regression line 
+sns.regplot(x=insurance_data['bmi'], y=insurance_data['charges'])
+
+# Colour coated scatter plot 
+sns.scatterplot(x=insurance_data['bmi'], y=insurance_data['charges'], hue=insurance_data['smoker'])
+
+#To further emphasize this fact, we can use the sns.lmplot command to add two regression lines, corresponding to smokers and nonsmokers.
+sns.lmplot(x="bmi", y="charges", hue="smoker", data=insurance_data)
+
+#categorical scatter plot
+sns.swarmplot(x=insurance_data['smoker'], y=insurance_data['charges'])

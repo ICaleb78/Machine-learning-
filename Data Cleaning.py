@@ -34,6 +34,12 @@ nfl_data.dropna()  #this might probably remove all the data, if the dataset cont
 columns_with_na_dropped = nfl_data.dropna(axis=1)
 columns_with_na_dropped.head()
 
+#Use this to know how many number of column dropped 
+# calculate number of dropped columns
+cols_in_original_dataset = sf_permits.shape[1]
+cols_in_na_dropped = sf_permits_with_na_dropped.shape[1]
+dropped_columns = cols_in_original_dataset - cols_in_na_dropped
+
 # just how much data did we lose?
 print("Columns in original dataset: %d \n" % nfl_data.shape[1])
 print("Columns with na's dropped: %d" % columns_with_na_dropped.shape[1])
@@ -41,3 +47,10 @@ print("Columns with na's dropped: %d" % columns_with_na_dropped.shape[1])
 # get a small subset of the NFL dataset
 subset_nfl_data = nfl_data.loc[:, 'EPA':'Season'].head()
 subset_nfl_data
+
+# replace all NA's with 0
+subset_nfl_data.fillna(0)
+
+# replace all NA's the value that comes directly after it in the same column, 
+# then replace all the remaining na's with 0
+subset_nfl_data.fillna(method='bfill', axis=0).fillna(0)

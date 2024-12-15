@@ -187,3 +187,79 @@ print('_'*30)
 print('\nNormalized data\nPreview:\n', normalized_pledges.head())
 print('Minimum value:', float(normalized_pledges.min()),
       '\nMaximum value:', float(normalized_pledges.max()))
+
+# plot normalized data
+ax = sns.histplot(normalized_pledges, kde=True)
+ax.set_title("Normalized data")
+plt.show()
+
+
+#Parsing Dates
+# modules we'll use
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import datetime
+
+# read in our data
+landslides = pd.read_csv("../input/landslide-events/catalog.csv")
+
+# set seed for reproducibility
+np.random.seed(0)
+
+#from the dataset, lets make it look like it contains dates
+# print the first few rows of the date column
+print(landslides['date'].head())
+
+#to check without loking at the rows 
+# check the data type of our date column
+landslides['date'].dtype
+
+# create a new column, date_parsed, with the parsed dates
+landslides['date_parsed'] = pd.to_datetime(landslides['date'], format="%m/%d/%y")
+
+#What if I run into an error with multiple date formats? 
+landslides['date_parsed'] = pd.to_datetime(landslides['Date'], infer_datetime_format=True)
+
+#to select the day of the month
+# get the day of the month from the date_parsed column
+day_of_month_landslides = landslides['date_parsed'].dt.day
+day_of_month_landslides.head()
+
+#Plot the day of the month to check the parsing date
+# remove na's
+day_of_month_landslides = day_of_month_landslides.dropna()
+
+# plot the day of the month
+sns.distplot(day_of_month_landslides, kde=False, bins=31)
+
+#to pick a row and column in a dataset
+earthquakes[3378:3383]
+
+#to check for more rows where there is a fault
+indices = np.where([date_lengths == 24])[1]
+print('Indices with corrupted data:', indices)
+earthquakes.loc[indices]
+
+#to manually input edit a data
+# TODO: Your code here
+earthquakes.loc[3378, "Date"] = "02/23/1975"
+earthquakes.loc[7512, "Date"] = "04/28/1978"
+earthquakes.loc[20650, "Date"] = "03/13/2011"
+earthquakes['date_parsed'] = pd.to_datetime(earthquakes['Date'], format="%m/%d/%Y")
+earthquakes['date_parsed'] = pd.to_datetime(earthquakes['Date'], infer_datetime_format=True)
+
+
+#CHARACTER ENCODING 
+Get our environment set up
+The first thing we'll need to do is load in the libraries we'll be using. Not our dataset, though: we'll get to it later!
+
+# modules we'll use
+import pandas as pd
+import numpy as np
+
+# helpful character encoding module
+import charset_normalizer
+
+# set seed for reproducibility
+np.random.seed(0)

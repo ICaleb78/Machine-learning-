@@ -263,3 +263,148 @@ import charset_normalizer
 
 # set seed for reproducibility
 np.random.seed(0)
+
+#to convert string to bytes
+# encode it to a different encoding, replacing characters that raise errors
+after = before.encode("utf-8", errors="replace")
+
+# check the type
+type(after)
+
+#to check the ASCII encoding (that can be onnly used for Only english language)
+# take a look at what the bytes look like
+after
+
+#to converstring back to bytes with the encodingx
+# convert it back to utf-8
+print(after.decode("utf-8"))
+
+
+# start with a string
+before = "This is the euro symbol: €"
+
+# encode it to a different encoding, replacing characters that raise errors
+after = before.encode("ascii", errors = "replace")
+
+# convert it back to utf-8
+print(after.decode("ascii"))
+
+# We've lost the original underlying byte string! It's been 
+# replaced with the underlying byte string for the unknown character :(
+
+#to check for the encoding of a file
+# look at the first ten thousand bytes to guess the character encoding
+with open("../input/kickstarter-projects/ks-projects-201801.csv", 'rb') as rawdata:
+    result = charset_normalizer.detect(rawdata.read(10000))
+
+# check what the character encoding might be
+print(result)
+
+# read in the file with the encoding detected by charset_normalizer
+kickstarter_2016 = pd.read_csv("../input/kickstarter-projects/ks-projects-201612.csv", encoding='Windows-1252')
+
+# look at the first few lines
+kickstarter_2016.head()
+
+#Saving your files with UTF-8 encoding
+# save our file (will be saved as UTF-8 by default!)
+kickstarter_2016.to_csv("ks-projects-201801-utf8.csv")
+
+#Encoding exercise 
+#Getting the environment ready
+# modules we'll use
+import pandas as pd
+import numpy as np
+
+# helpful character encoding module
+import charset_normalizer
+
+# set seed for reproducibility
+np.random.seed(0)
+
+#what are encoding 
+sample_entry = b'\xa7A\xa6n'
+print(sample_entry)
+print('data type:', type(sample_entry))
+
+#to change the encoding from "big5-tw' to "UTF-8"
+before_entry = sample_entry.decode("big5-tw")
+new_entry = before_entry.encode()
+
+# Check your answer
+q1.check()
+
+
+#INCOSISTENT DATA ENTRY LESSON 5
+
+# modules we'll use
+import pandas as pd
+import numpy as np
+
+# helpful modules
+import fuzzywuzzy
+from fuzzywuzzy import process
+import charset_normalizer
+
+# read in all our data
+professors = pd.read_csv("../input/pakistan-intellectual-capital/pakistan_intellectual_capital.csv")
+
+# set seed for reproducibility
+np.random.seed(0)
+
+#to get the data in the country column and check for the uniqueness 
+# get all the unique values in the 'Country' column
+countries = professors['Country'].unique()
+
+# sort them alphabetically and then take a closer look
+countries.sort()
+countries
+
+# convert to lower case
+professors['Country'] = professors['Country'].str.lower()
+# remove trailing white spaces
+professors['Country'] = professors['Country'].str.strip()
+
+#Use fuzzy matching to correct inconsistent data entry
+# get the top 10 closest matches to "south korea"
+matches = fuzzywuzzy.process.extract("south korea", countries, limit=10, scorer=fuzzywuzzy.fuzz.token_sort_ratio)
+
+# take a look at them
+matches
+
+# function to replace rows in the provided column of the provided dataframe
+# that match the provided string above the provided ratio with the provided string
+def replace_matches_in_column(df, column, string_to_match, min_ratio = 47):
+    # get a list of unique strings
+    strings = df[column].unique()
+    
+    # get the top 10 closest matches to our input string
+    matches = fuzzywuzzy.process.extract(string_to_match, strings, 
+                                         limit=10, scorer=fuzzywuzzy.fuzz.token_sort_ratio)
+
+    # only get matches with a ratio > 90
+    close_matches = [matches[0] for matches in matches if matches[1] >= min_ratio]
+
+    # get the rows of all the close matches in our dataframe
+    rows_with_matches = df[column].isin(close_matches)
+
+    # replace all rows with close matches with the input matches 
+    df.loc[rows_with_matches, column] = string_to_match
+    
+    # let us know the function's done
+    print("All done!")
+
+# use the function we just wrote to replace close matches to "south korea" with "south korea"
+replace_matches_in_column(df=professors, column='Country', string_to_match="south korea")
+
+# get all the unique values in the 'Country' column
+countries = professors['Country'].unique()
+
+# sort them alphabetically and then take a closer look
+countries.sort()
+countries
+#to change or replace strings in a column 
+professors['Graduated from'] = professors['Graduated from'].str.strip()
+matches = fuzzywuzzy.process.extract("usa", countries, limit=10, scorer=fuzzywuzzy.fuzz.token_sort_ratio)
+replace_matches_in_column(df=professors, column='Country', string_to_match="usa", min_ratio=70)
+# Check your answer

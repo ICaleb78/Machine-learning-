@@ -300,6 +300,8 @@ df = pd.read_csv("../input/fe-course-data/ames.csv")
 X = df.copy()
 y = X.pop("SalePrice")
 
+
+#1) Create Mathematical Transforms
 # YOUR CODE HERE
 X_1 = pd.DataFrame()  # dataframe to hold new features
 
@@ -322,3 +324,30 @@ X_new = X_new.mul(df.Continuous, axis=0)
 
 # Join the new features to the feature set
 X = X.join(X_new)
+
+
+#2) Interaction with a Categorical
+# YOUR CODE HERE
+# One-hot encode BldgType. Use `prefix="Bldg"` in `get_dummies`
+X_2 = pd.get_dummies(df.BldgType, prefix="Bldg")
+# Multiply
+X_2 = X_2.mul(df.GrLivArea, axis=0)
+
+
+# Check your answer
+q_2.check()
+
+#3) Count Feature
+X_3 = pd.DataFrame()
+
+# YOUR CODE HERE
+X_3["PorchTypes"] = df[["WoodDeckSF", "OpenPorchSF", "EnclosedPorch", "Threeseasonporch",
+    "ScreenPorch"]].gt(0.0).sum(axis=1)
+
+# Check your answer
+q_3.check()
+
+#4) Break Down a Categorical Feature¶
+#MSSubClass describes the type of a dwelling
+
+df.MSSubClass.unique()

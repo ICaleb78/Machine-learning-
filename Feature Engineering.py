@@ -211,3 +211,114 @@ accidents["RoadwayFeatures"] = accidents[roadway_features].sum(axis=1)
 
 accidents[roadway_features + ["RoadwayFeatures"]].head(10)
 
+components = [ "Cement", "BlastFurnaceSlag", "FlyAsh", "Water",
+               "Superplasticizer", "CoarseAggregate", "FineAggregate"]
+concrete["Components"] = concrete[components].gt(0).sum(axis=1)
+
+concrete[components + ["Components"]].head(10)
+
+#To split feacture 
+customer[["Type", "Level"]] = (  # Create two new features
+    customer["Policy"]           # from the Policy feature
+    .str                         # through the string accessor
+    .split(" ", expand=True)     # by splitting on " "
+                                 # and expanding the result into separate columns
+)
+
+customer[["Policy", "Type", "Level"]].head(10)
+
+#to join features 
+autos["make_and_style"] = autos["make"] + "_" + autos["body_style"]
+autos[["make", "body_style", "make_and_style"]].head()
+
+#Group Transforms 
+customer["AverageIncome"] = (
+    customer.groupby("State")  # for each state
+    ["Income"]                 # select the income
+    .transform("mean")         # and compute its mean
+)
+
+customer[["State", "Income", "AverageIncome"]].head(10)
+
+#how you could calculate the frequency with which each state occurs in the dataset:
+customer["StateFreq"] = (
+    customer.groupby("State")
+    ["State"]
+    .transform("count")
+    / customer.State.count()
+)
+
+customer[["State", "StateFreq"]].head(10)
+
+#If you're using training and validation splits, to preserve their independence, it's best to create a grouped feature using
+#only the training set and then join it to the validation set.
+#e can use the validation set's merge method after creating a unique set of values with drop_duplicates on the training set
+# Create splits
+df_train = customer.sample(frac=0.5)
+df_valid = customer.drop(df_train.index)
+
+# Create the average claim amount by coverage type, on the training set
+df_train["AverageClaim"] = df_train.groupby("Coverage")["ClaimAmount"].transform("mean")
+
+# Merge the values into the validation set
+df_valid = df_valid.merge(
+    df_train[["Coverage", "AverageClaim"]].drop_duplicates(),
+    on="Coverage",
+    how="left",
+)
+
+df_valid[["Coverage", "AverageClaim"]].head(10)
+
+#EXERCISE: CREATING FEATURES 
+
+# Setup feedback system
+from learntools.core import binder
+binder.bind(globals())
+from learntools.feature_engineering_new.ex3 import *
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import cross_val_score
+from xgboost import XGBRegressor
+
+
+def score_dataset(X, y, model=XGBRegressor()):
+    # Label encoding for categoricals
+    for colname in X.select_dtypes(["category", "object"]):
+        X[colname], _ = X[colname].factorize()
+    # Metric for Housing competition is RMSLE (Root Mean Squared Log Error)
+    score = cross_val_score(
+        model, X, y, cv=5, scoring="neg_mean_squared_log_error",
+    )
+    score = -1 * score.mean()
+    score = np.sqrt(score)
+    return score
+
+
+# Prepare data
+df = pd.read_csv("../input/fe-course-data/ames.csv")
+X = df.copy()
+y = X.pop("SalePrice")
+
+# YOUR CODE HERE
+X_1 = pd.DataFrame()  # dataframe to hold new features
+
+X_1["LivLotRatio"] = (df.GrLivArea / df.LotArea)
+X_1["Spaciousness"] = ((df.FirstFlrSF + df.SecondFlrSF) / (df.TotRmsAbvGrd))
+X_1["TotalOutsideSF"] = (df.WoodDeckSF + df.OpenPorchSF + df.EnclosedPorch + df.Threeseasonporch + df.ScreenPorch)
+
+# Check your answer
+q_1.check()
+
+
+#If you've discovered an interaction effect between a numeric feature and a categorical feature, you might want to 
+#model it explicitly using a one-hot encoding, like so:
+
+# One-hot encode Categorical feature, adding a column prefix "Cat"
+X_new = pd.get_dummies(df.Categorical, prefix="Cat")
+
+# Multiply row-by-row
+X_new = X_new.mul(df.Continuous, axis=0)
+
+# Join the new features to the feature set
+X = X.join(X_new)

@@ -150,3 +150,64 @@ print(mi_scores.head(20))
 plt.figure(dpi=100, figsize=(8, 5))
 plot_mi_scores(mi_scores.head(20))
 # plot_mi_scores(mi_scores.tail(20))  # uncomment to see bottom 20
+
+sns.catplot(x="BldgType", y="SalePrice", data=df, kind="boxen"); #a type of data visualization
+
+# YOUR CODE HERE: 
+feature = "GrLivArea"
+
+sns.lmplot(
+    x=feature, y="SalePrice", hue="BldgType", col="BldgType",
+    data=df, scatter_kws={"edgecolor": 'w'}, col_wrap=3, height=4,
+);
+
+mi_scores.head(10) # for showing features 
+
+#LESSON THREE 
+#CREATING FEATURES 
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+plt.style.use("seaborn-whitegrid")
+plt.rc("figure", autolayout=True)
+plt.rc(
+    "axes",
+    labelweight="bold",
+    labelsize="large",
+    titleweight="bold",
+    titlesize=14,
+    titlepad=10,
+)
+
+accidents = pd.read_csv("../input/fe-course-data/accidents.csv")
+autos = pd.read_csv("../input/fe-course-data/autos.csv")
+concrete = pd.read_csv("../input/fe-course-data/concrete.csv")
+customer = pd.read_csv("../input/fe-course-data/customer.csv")
+
+#Mathematical Transforms 
+autos["stroke_ratio"] = autos.stroke / autos.bore
+
+autos[["stroke", "bore", "stroke_ratio"]].head()
+
+autos["displacement"] = (np.pi * ((0.5 * autos.bore) ** 2) * autos.stroke * autos.num_of_cylinders)
+
+
+# If the feature has 0.0 values, use np.log1p (log(1+x)) instead of np.log
+accidents["LogWindSpeed"] = accidents.WindSpeed.apply(np.log1p)
+
+# Plot a comparison
+fig, axs = plt.subplots(1, 2, figsize=(8, 4))
+sns.kdeplot(accidents.WindSpeed, shade=True, ax=axs[0])
+sns.kdeplot(accidents.LogWindSpeed, shade=True, ax=axs[1]);
+
+#count 
+roadway_features = ["Amenity", "Bump", "Crossing", "GiveWay",
+    "Junction", "NoExit", "Railway", "Roundabout", "Station", "Stop",
+    "TrafficCalming", "TrafficSignal"]
+accidents["RoadwayFeatures"] = accidents[roadway_features].sum(axis=1)
+
+accidents[roadway_features + ["RoadwayFeatures"]].head(10)
+

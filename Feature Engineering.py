@@ -775,3 +775,7 @@ component = "PC1"
 
 idx = X_pca[component].sort_values(ascending=False).index
 df.loc[idx, ["SalePrice", "Neighborhood", "SaleCondition"] + features]
+
+
+
+#Target Encoding

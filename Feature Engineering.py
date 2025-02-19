@@ -351,3 +351,167 @@ q_3.check()
 #MSSubClass describes the type of a dwelling
 
 df.MSSubClass.unique()
+
+#You can see that there is a more general categorization described (roughly) by the first word of each category. 
+#Create a feature containing only these first words by splitting MSSubClass at the first underscore _. 
+#(Hint: In the split method use an argument n=1.)
+
+X_4 = pd.DataFrame()
+
+# YOUR CODE HERE
+X_4["MSClass"] = df.MSSubClass.str.split("_", n=1, expand=True)[0]    
+
+# Check your answer
+q_4.check()
+
+#5) Use a Grouped Transform
+#The value of a home often depends on how it compares to typical homes in its neighborhood. Create a feature MedNhbdArea 
+#that describes the median of GrLivArea grouped on Neighborhood
+
+X_5 = pd.DataFrame()
+
+# YOUR CODE HERE
+X_5["MedNhbdArea"] = (
+    df.groupby("Neighborhood") 
+    ["GrLivArea"]                
+    .transform("median"))
+   
+# Check your answer
+q_5.check()
+
+
+#Clustering With K-Means
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.cluster import KMeans
+
+plt.style.use("seaborn-whitegrid")
+plt.rc("figure", autolayout=True)
+plt.rc(
+    "axes",
+    labelweight="bold",
+    labelsize="large",
+    titleweight="bold",
+    titlesize=14,
+    titlepad=10,
+)
+
+df = pd.read_csv("../input/fe-course-data/housing.csv")
+X = df.loc[:, ["MedInc", "Latitude", "Longitude"]]
+X.head()
+
+# Create cluster feature
+kmeans = KMeans(n_clusters=6)
+X["Cluster"] = kmeans.fit_predict(X)
+X["Cluster"] = X["Cluster"].astype("category")
+
+X.head()
+
+sns.relplot(
+    x="Longitude", y="Latitude", hue="Cluster", data=X, height=6,
+);
+X["MedHouseVal"] = df["MedHouseVal"]
+sns.catplot(x="MedHouseVal", y="Cluster", data=X, kind="boxen", height=6);
+
+#Exercise: Clustering With K-Means
+# Setup feedback system
+from learntools.core import binder
+binder.bind(globals())
+from learntools.feature_engineering_new.ex4 import *
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.model_selection import cross_val_score
+from xgboost import XGBRegressor
+
+# Set Matplotlib defaults
+plt.style.use("seaborn-whitegrid")
+plt.rc("figure", autolayout=True)
+plt.rc(
+    "axes",
+    labelweight="bold",
+    labelsize="large",
+    titleweight="bold",
+    titlesize=14,
+    titlepad=10,
+)
+
+
+def score_dataset(X, y, model=XGBRegressor()):
+    # Label encoding for categoricals
+    for colname in X.select_dtypes(["category", "object"]):
+        X[colname], _ = X[colname].factorize()
+    # Metric for Housing competition is RMSLE (Root Mean Squared Log Error)
+    score = cross_val_score(
+        model, X, y, cv=5, scoring="neg_mean_squared_log_error",
+    )
+    score = -1 * score.mean()
+    score = np.sqrt(score)
+    return score
+
+
+# Prepare data
+df = pd.read_csv("../input/fe-course-data/ames.csv")
+
+
+#2) Create a Feature of Cluster Labels
+#Creating a k-means clustering with the following parameters:
+#features: LotArea, TotalBsmtSF, FirstFlrSF, SecondFlrSF,GrLivArea
+#number of clusters: 10
+#iterations: 10
+
+X = df.copy()
+y = X.pop("SalePrice")
+
+
+# YOUR CODE HERE: Define a list of the features to be used for the clustering
+features =["LotArea", "TotalBsmtSF", "FirstFlrSF", "SecondFlrSF","GrLivArea"]
+
+# Standardize
+X_scaled = X.loc[:, features]
+X_scaled = (X_scaled - X_scaled.mean(axis=0)) / X_scaled.std(axis=0)
+
+
+# YOUR CODE HERE: Fit the KMeans model to X_scaled and create the cluster labels
+kmeans = KMeans(n_clusters=10, n_init=10, random_state=0)
+X["Cluster"] = kmeans.fit_predict(X_scaled)
+
+
+# Check your answer
+q_2.check()
+
+Xy = X.copy()
+Xy["Cluster"] = Xy.Cluster.astype("category")
+Xy["SalePrice"] = y
+sns.relplot(
+    x="value", y="SalePrice", hue="Cluster", col="variable",
+    height=4, aspect=1, facet_kws={'sharex': False}, col_wrap=3,
+    data=Xy.melt(
+        value_vars=features, id_vars=["SalePrice", "Cluster"],
+    ),
+);
+
+#3) Cluster-Distance Features
+#Now add the cluster-distance features to your dataset. You can get these distance features by using the fit_transform method 
+#of kmeans instead of fit_predict
+
+kmeans = KMeans(n_clusters=10, n_init=10, random_state=0)
+
+
+# YOUR CODE HERE: Create the cluster-distance features using `fit_transform`
+X_cd = kmeans.fit_transform(X_scaled)
+
+# Label features and join to dataset
+X_cd = pd.DataFrame(X_cd, columns=[f"Centroid_{i}" for i in range(X_cd.shape[1])])
+X = X.join(X_cd)
+
+
+# Check your answer
+q_3.check()
+
+
+#Principal Component Analysis

@@ -752,3 +752,26 @@ y = X.pop("SalePrice")
 X = X.join(X_pca)
 score = score_dataset(X, y)
 print(f"Your score: {score:.5f} RMSLE")
+
+
+#The next question explores a way you can use PCA to detect outliers in the dataset (meaning, data points that are unusually 
+#extreme in some way). Outliers can have a detrimental effect on model performance, so it's good to be aware of them in case 
+#you need to take corrective action. PCA in particular can show you anomalous variation which might not be apparent from the
+#original features: neither small houses nor houses with large basements are unusual, but it is unusual for small houses to 
+#have large basements. That's the kind of thing a principal component can show you.
+#Run the next cell to show distribution plots for each of the principal components you created above
+sns.catplot(
+    y="value",
+    col="variable",
+    data=X_pca.melt(),
+    kind='boxen',
+    sharey=False,
+    col_wrap=2,
+);
+
+#Now run the next cell to see those houses that sit at the extremes of a component
+# You can change PC1 to PC2, PC3, or PC4
+component = "PC1"
+
+idx = X_pca[component].sort_values(ascending=False).index
+df.loc[idx, ["SalePrice", "Neighborhood", "SaleCondition"] + features]

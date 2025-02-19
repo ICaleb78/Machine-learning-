@@ -886,3 +886,74 @@ df.select_dtypes(["object"]).nunique()
 #To see how many times a category occurs in the dataset, you can use the value_counts method. 
 #This cell shows the counts for SaleType, but you might want to consider others as well.
 df["SaleType"].value_counts()
+
+#pply a target encoding to your choice of feature. As we discussed in the tutorial, 
+#to avoid overfitting, we need to fit the encoder on data heldout from the training set.
+# Encoding split
+X_encode = df.sample(frac=0.20, random_state=0)
+y_encode = X_encode.pop("SalePrice")
+
+# Training split
+X_pretrain = df.drop(X_encode.index)
+y_train = X_pretrain.pop("SalePrice")
+
+#2) Apply M-Estimate Encoding¶
+#Apply a target encoding to your choice of categorical features. 
+#Also choose a value for the smoothing parameter m (any value is okay for a correct answer).
+# YOUR CODE HERE: Create the MEstimateEncoder
+# Choose a set of features to encode and a value for m
+encoder = MEstimateEncoder(cols=["Neighborhood"], m=5.0)
+
+
+# Fit the encoder on the encoding split
+encoder.fit(X_encode, y_encode)
+
+# Encode the training split
+X_train = encoder.transform(X_pretrain, y_train)
+
+
+# Check your answer
+q_2.check()
+
+#If you'd like to see how the encoded feature compares to the target, you can run this cell:
+feature = encoder.cols
+
+plt.figure(dpi=90)
+ax = sns.distplot(y_train, kde=True, hist=False)
+ax = sns.distplot(X_train[feature], color='r', ax=ax, hist=True, kde=False, norm_hist=True)
+ax.set_xlabel("SalePrice");
+
+#From the distribution plots, does it seem like the encoding is informative?
+#And this cell will show you the score of the encoded set compared to the original set:
+X = df.copy()
+y = X.pop("SalePrice")
+score_base = score_dataset(X, y)
+score_new = score_dataset(X_train, y_train)
+
+print(f"Baseline Score: {score_base:.4f} RMSLE")
+print(f"Score with Encoding: {score_new:.4f} RMSLE")
+
+# Try experimenting with the smoothing parameter m
+# Try 0, 1, 5, 50
+m = 0
+
+X = df.copy()
+y = X.pop('SalePrice')
+
+# Create an uninformative feature
+X["Count"] = range(len(X))
+X["Count"][1] = 0  # actually need one duplicate value to circumvent error-checking in MEstimateEncoder
+
+# fit and transform on the same dataset
+encoder = MEstimateEncoder(cols="Count", m=m)
+X = encoder.fit_transform(X, y)
+
+# Results
+score =  score_dataset(X, y)
+print(f"Score: {score:.4f} RMSLE")
+
+
+plt.figure(dpi=90)
+ax = sns.distplot(y, kde=True, hist=False)
+ax = sns.distplot(X["Count"], color='r', ax=ax, hist=True, kde=False, norm_hist=True)
+ax.set_xlabel("SalePrice");

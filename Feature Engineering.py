@@ -779,3 +779,110 @@ df.loc[idx, ["SalePrice", "Neighborhood", "SaleCondition"] + features]
 
 
 #Target Encoding
+autos["make_encoded"] = autos.groupby("make")["price"].transform("mean")
+
+autos[["make", "price", "make_encoded"]].head(10)
+
+#Example - MovieLens1M
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import warnings
+
+plt.style.use("seaborn-whitegrid")
+plt.rc("figure", autolayout=True)
+plt.rc(
+    "axes",
+    labelweight="bold",
+    labelsize="large",
+    titleweight="bold",
+    titlesize=14,
+    titlepad=10,
+)
+warnings.filterwarnings('ignore')
+
+
+df = pd.read_csv("../input/fe-course-data/movielens1m.csv")
+df = df.astype(np.uint8, errors='ignore') # reduce memory footprint
+print("Number of Unique Zipcodes: {}".format(df["Zipcode"].nunique()))
+
+#We'll start by creating a 25% split to train the target encoder
+X = df.copy()
+y = X.pop('Rating')
+
+X_encode = X.sample(frac=0.25)
+y_encode = y[X_encode.index]
+X_pretrain = X.drop(X_encode.index)
+y_train = y[X_pretrain.index]
+
+#The category_encoders package in scikit-learn-contrib implements an m-estimate encoder, which we'll use to encode our Zipcode feature.
+from category_encoders import MEstimateEncoder
+
+# Create the encoder instance. Choose m to control noise.
+encoder = MEstimateEncoder(cols=["Zipcode"], m=5.0)
+
+# Fit the encoder on the encoding split.
+encoder.fit(X_encode, y_encode)
+
+# Encode the Zipcode column to create the final training data
+X_train = encoder.transform(X_pretrain)
+
+#Let's compare the encoded values to the target to see how informative our encoding might be.
+plt.figure(dpi=90)
+ax = sns.distplot(y, kde=False, norm_hist=True)
+ax = sns.kdeplot(X_train.Zipcode, color='r', ax=ax)
+ax.set_xlabel("Rating")
+ax.legend(labels=['Zipcode', 'Rating']);
+
+
+#Exercise: Target Encoding
+# Setup feedback system
+from learntools.core import binder
+binder.bind(globals())
+from learntools.feature_engineering_new.ex6 import *
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import warnings
+from category_encoders import MEstimateEncoder
+from sklearn.model_selection import cross_val_score
+from xgboost import XGBRegressor
+
+# Set Matplotlib defaults
+plt.style.use("seaborn-whitegrid")
+plt.rc("figure", autolayout=True)
+plt.rc(
+    "axes",
+    labelweight="bold",
+    labelsize="large",
+    titleweight="bold",
+    titlesize=14,
+    titlepad=10,
+)
+warnings.filterwarnings('ignore')
+
+
+def score_dataset(X, y, model=XGBRegressor()):
+    # Label encoding for categoricals
+    for colname in X.select_dtypes(["category", "object"]):
+        X[colname], _ = X[colname].factorize()
+    # Metric for Housing competition is RMSLE (Root Mean Squared Log Error)
+    score = cross_val_score(
+        model, X, y, cv=5, scoring="neg_mean_squared_log_error",
+    )
+    score = -1 * score.mean()
+    score = np.sqrt(score)
+    return score
+
+
+df = pd.read_csv("../input/fe-course-data/ames.csv")
+
+#this cell to see how many categories each categorical feature in the Ames dataset has
+df.select_dtypes(["object"]).nunique()
+
+#To see how many times a category occurs in the dataset, you can use the value_counts method. 
+#This cell shows the counts for SaleType, but you might want to consider others as well.
+df["SaleType"].value_counts()

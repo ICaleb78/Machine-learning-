@@ -1,3 +1,45 @@
+#DSN
+print('type done to finish')
+def get_grade(score):
+    if score >= 70:
+        return 'A'
+    elif score >= 60:
+        return 'B'
+    elif score >= 50:
+        return 'C'
+    elif score >= 45:
+        return 'D'
+    else:
+        return 'F'
+
+def main():
+    scores = []
+    while True:
+        user_input = input("Enter a score ")
+        if user_input.lower() == 'done':
+            break
+        try:
+            score = int(user_input)
+            if 0 <= score <= 100:
+                scores.append(score)
+            else:
+                print("Please enter a valid score between 0 and 100.")
+        except ValueError:
+            print("Invalid input. Please enter a numeric score.")
+    
+    print("\nStudent Grades:")
+    for i, score in enumerate(scores, 1):
+        print(f"{score} = {get_grade(score)}")
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
 pin = input('enter a number:')
 try :
     check = int(pin)
